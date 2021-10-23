@@ -4,6 +4,19 @@ import Products from "./products.js";
 
 
 export default class Login extends Component {
+    constructor(props){
+        super(props);
+
+        this.state = {
+          username : ''
+        }
+
+        this.updateInput = this.updateInput.bind(this);
+    }
+    updateInput(event){
+        this.setState({username : event.target.value})
+    }
+
     render() {
         return (
         <div className="inner">
@@ -13,7 +26,7 @@ export default class Login extends Component {
 
                 <div className="form-group">
                     <label>Email</label>
-                    <input type="email" className="form-control" placeholder="Enter email" />
+                    <input type="email" onChange={this.updateInput} className="form-control" placeholder="Enter email" />
                 </div>
 
                 <div className="form-group">
@@ -28,7 +41,7 @@ export default class Login extends Component {
                     </div>
                 </div>
 
-                <button type="submit" ><Link className="btn btn-dark btn-lg btn-block" to={"/products"}>Sign up</Link></button>
+                <button type="submit" ><Link className="btn btn-dark btn-lg btn-block" to={{pathname: "/products", state: { user : this.state.username}}}>Sign up</Link></button>
                 <p className="forgot-password text-right">
                     Forgot <a href="#">password?</a>
                 </p>
