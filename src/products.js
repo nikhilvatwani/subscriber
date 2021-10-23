@@ -4,14 +4,31 @@ import Row from 'react-bootstrap/Row'
 import Col from 'react-bootstrap/Col'
 import Button from 'react-bootstrap/Button'
 import $ from 'jquery';
+import Cookies from 'universal-cookie';
+const cookies = new Cookies();
 export default class Products extends Component {
+
     constructor(props) {
         super(props);
         this.state = {
           products:[],
           items:[]
         };
+        const { router, params, location, routes } = this.props
+        let userId = 1;
+        switch(location.state.user){
+            case "nikhil": userId = 1;
+            break;
+            case "kunal": userId = 2;
+            break;
+            case "amit": userId = 3;
+            break;
+        }
+
+        cookies.set('userId', userId, { path: '/' });
+        console.log(cookies.get('userId'))
       }
+
 
       componentDidMount() {
           this.Products().then((res) => {
@@ -22,7 +39,7 @@ export default class Products extends Component {
         }
 
      Products(){
-        return $.post('http://localhost:8080/broker/notify', {id_user: 2})
+        return $.post('http://localhost:8080/broker/notify',{id_user: cookies.get('userId')})
         .then(function(data) {
           console.log(data)
           return data;
@@ -44,6 +61,7 @@ export default class Products extends Component {
         });
       }
      addToWishlist = (product_id) => {
+
         $.post("http://localhost:8080/wishlist/add/",
                {productId: product_id}
                //this.getTodos
