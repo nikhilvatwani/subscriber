@@ -19,6 +19,7 @@ export default class Login extends Component {
 
     render() {
         return (
+        <div class="top">
         <div className="inner">
             <form action="/products.js">
 
@@ -46,6 +47,7 @@ export default class Login extends Component {
                     Forgot <a href="#">password?</a>
                 </p>
             </form>
+          </div>
           </div>
         );
     }

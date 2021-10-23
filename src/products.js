@@ -5,6 +5,8 @@ import Col from 'react-bootstrap/Col'
 import Button from 'react-bootstrap/Button'
 import $ from 'jquery';
 import Cookies from 'universal-cookie';
+import { MDBCard, MDBCardBody, MDBCardTitle, MDBCardText, MDBBtn, MDBCardFooter, MDBCardHeader } from 'mdb-react-ui-kit';
+
 const cookies = new Cookies();
 export default class Products extends Component {
 
@@ -25,16 +27,46 @@ export default class Products extends Component {
         }
 
         cookies.set('userId', userId, { path: '/' });
-        console.log(cookies.get('userId'))
+
+
       }
 
+       fetchApi() {
+             this.Products().then((res) => {
+                         const allProducts = JSON.parse(JSON.stringify(res));
+                         //console.log(allProducts)
+                         for(let i=0; i<allProducts.data.length;i++){
+                             var jsonString = JSON.parse(allProducts.data[i].message)
+                             jsonString = JSON.stringify(jsonString)
+                             jsonString = JSON.parse(JSON.parse(jsonString))
+                             allProducts.data[i].message = jsonString
+                         }
+                         var map1 = new Map();
+                         var temp = this.state.products;
+                         allProducts.data.map((curr)=>{
+                             if(map1.get(curr.id_topic)==null)
+                                 map1.set(curr.id_topic, []);
+                             map1.set(curr.id_top, map1.get(curr.id_topic).push(curr.message))
+                         })
+                         map1.delete(undefined)
+                         console.log("-----------MAP1---------------")
+                         console.log(map1)
+
+                         for(var ele of temp.keys()){
+                            if(ele!=undefined && map1.get(ele)==undefined) map1.set(ele, temp.get(ele))
+                         }
+                         map1.delete(undefined)
+                         console.log("-----------TEMP---------------")
+                         console.log(map1)
+                         this.setState({products: map1});
+                       });
+       }
 
       componentDidMount() {
-          this.Products().then((res) => {
-            const allProducts = JSON.parse(JSON.stringify(res));
-            this.setState({products: allProducts.data});
-            console.log(this.state.products);
-          });
+        this.fetchApi()
+        var timer = setInterval(()=>{this.fetchApi()}, 8000, (err) => {
+            console.log(err)
+        });
         }
 
      Products(){
@@ -53,22 +85,30 @@ export default class Products extends Component {
     render(){
         return (
             <div class="top">
-                <Row xs={1} md={4} className="g-4">
-                  {Array.from({ length: this.state.products.length }).map((_, idx) => (
+                <Row xs={1} md={3} className="g-3">
+                 {Array.from(this.state.products.keys()).map((key,idex) => (
                     <Col>
-                      <Card>
-                        <Card.Img className="card11" variant="top" src={this.state.products[idx].image} />
-                        <Card.Body>
-                          <Card.Title>{this.state.products[idx].name}</Card.Title>
-                          <Card.Text>
-                            {this.state.products[idx].description}
-                          </Card.Text>
-                          <button type="button" class="btn btn-primary" onClick={() => this.addToWishlist(this.state.products[idx].id)}>Add to wishlist</button>
-                        </Card.Body>
-                      </Card>
+                    <h4>{key}</h4>
+                    <Row xs={1} md={1} className="g-1">
+                      {Array.from(this.state.products.get(key)).map((_, idx) => (
+                        <Col>
+                            <MDBCard style={{ maxWidth: '22rem' }} className='h-100'>
+                                   <MDBCardHeader className='text-dark'>{_.name}</MDBCardHeader>
+                                  <MDBCardBody>
+                                    <MDBCardText>
+                                        <small className='text-muted'> {_.description}</small>
+                                    </MDBCardText>
+                                  </MDBCardBody>
+                                  <MDBCardFooter>
+                                    <MDBBtn>${_.price}</MDBBtn>
+                                </MDBCardFooter>
+                                </MDBCard>
+                        </Col>
+                      ))}
+                    </Row>
                     </Col>
-                  ))}
-                </Row>
+               ))}
+               </Row>
             </div>
 
         );
