@@ -2,10 +2,10 @@
 FROM node:13.12.0-alpine
 
 # set working directory
-WORKDIR /myfirstreact
+WORKDIR /subscriber
 
 # add `/app/node_modules/.bin` to $PATH
-ENV PATH /myfirstreact/node_modules/.bin:$PATH
+ENV PATH /subscriber/node_modules/.bin:$PATH
 
 # install app dependencies
 COPY package.json ./

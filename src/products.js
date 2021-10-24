@@ -13,7 +13,9 @@ export default class Products extends Component {
     constructor(props) {
         super(props);
         this.state = {
-          products:[]
+          products:[],
+          items:[],
+          topics:[]
         };
         const { router, params, location, routes } = this.props
         let userId = 1;
@@ -28,7 +30,7 @@ export default class Products extends Component {
 
         cookies.set('userId', userId, { path: '/' });
 
-
+        this.Advertise()
       }
 
        fetchApi() {
@@ -67,14 +69,46 @@ export default class Products extends Component {
         var timer = setInterval(()=>{this.fetchApi()}, 8000, (err) => {
             console.log(err)
         });
-        }
+         var timerAdvertise = setInterval(()=>{this.Advertise()}, 15000, (err) => {
+            console.log(err)
+        });
+       }
 
      Products(){
         return $.post('http://localhost:8080/broker/notify',{id_user: cookies.get('userId')})
         .then(function(data) {
+          console.log(data)
           return data;
         });
       }
+
+      Subscribe(subTopic){
+        return $.post('http://localhost:8080/broker/subscribe', {id_user: cookies.get('userId'), id_topic: subTopic})
+        .then(function(data) {
+          console.log(data)
+          return data;
+        });
+      }
+      Unsubscribe(unSubTopic){
+        return $.post('http://localhost:8080/broker/unsubscribe', {id_user: cookies.get('userId'), id_topic: unSubTopic})
+        .then(function(data) {
+          console.log(data)
+          return data;
+        });
+      }
+
+      Advertise(){
+          return $.getJSON('http://localhost:8080/broker/advertise')
+          .then((res) => {
+            const allTopics = JSON.parse(JSON.stringify(res));
+            var finalTopics = [];
+            allTopics.data.map((curr) => {
+                finalTopics.push(curr.topic_name)
+            })
+            console.log(finalTopics);
+            this.setState({topics: finalTopics});
+          });
+        }
      addToWishlist = (product_id) => {
 
         $.post("http://localhost:8080/wishlist/add/",
@@ -85,6 +119,18 @@ export default class Products extends Component {
     render(){
         return (
             <div class="top">
+                <h3>Topics</h3>
+                <Row xs={1} md={4} className="g-4">
+                    {Array.from(this.state.topics).map((currTopic,idex) => (
+                        <Col>
+                            <h4>{currTopic.toUpperCase()}</h4>
+                            <button type="button" class="btn btn-primary" onClick={() => this.Subscribe(currTopic)} >Subscribe</button>
+                            <button type="button" class="btn btn-primary" style={{ marginLeft: '5%'}}onClick={() => this.Unsubscribe(currTopic)} >Unsubscribe</button>
+                        </Col>
+                     ))}
+                </Row>
+                <hr />
+                <h3>Results</h3>
                 <Row xs={1} md={3} className="g-3">
                  {Array.from(this.state.products.keys()).map((key,idex) => (
                     <Col>
